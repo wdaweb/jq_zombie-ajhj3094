@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .arrow {
+      width: 400px;
+      height: 200px;
+      background: url('https://thumbs.dreamstime.com/b/red-arrow-isolated-white-background-red-arrow-vector-stock-arrow-icon-110771171.jpg') no-repeat center / cover;
+      transform: rotate(180deg);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="arrow"></div>
+  <script>
+    const arrow = document.querySelector('.arrow');
+
+    document.onmousemove = (e) => {
+      let X = e.clientX - document.body.clientWidth / 2;
+      let Y = document.body.clientHeight / 2 - e.clientY;
+      let deg = 0;
+
+      console.log(X, Y)
+
+      if (X > 0 && Y > 0) {
+        // 第一象限
+        deg = (Math.atan(Y / X) * 180) / Math.PI;
+      } else if (X < 0 && Y > 0) {
+        // 第二象限
+        deg = 180 + (Math.atan(Y / X) * 180) / Math.PI;
+      } else if (X < 0 && Y < 0) {
+        // 第三象限
+        deg = 180 + (Math.atan(Y / X) * 180) / Math.PI;
+      } else {
+        //第四象限
+        deg = 360 + (Math.atan(Y / X) * 180) / Math.PI;
+      }
+
+      // console.log(deg);
+
+      arrow.style.transform = `rotate(${180 - deg}deg)`;
+    };
+  </script>
+</body>
+
+</html>

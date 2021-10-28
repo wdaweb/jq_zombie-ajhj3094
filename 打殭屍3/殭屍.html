@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column-reverse;
+    }
+
+    #game {
+      width: 900px;
+      height: 476px;
+      background: url(./images/背景.jpg) no-repeat center/contain;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid #333;
+    }
+
+    #game img {
+      height: 150px;
+      position: absolute;
+    }
+
+    .gun {
+      width: 100px;
+      height: 80px;
+      background-image: url("./images/光束槍.png");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+      position: absolute;
+      top: calc(50% - 40px);
+      left: calc(50% - 50px);
+      /* transform: translate(-50%, -50%); */
+      transform: rotate(0deg);
+      z-index: 1;
+    }
+
+
+    .zombie {
+      z-index: 1000;
+    }
+
+    .blood {
+      z-index: 0;
+    }
+
+    .light {
+      width: 750px;
+      height: auto !important;
+      position: absolute;
+      top: calc(50% - 205px);
+      left: calc(50% - 160px);
+      border: 1px solid #111;
+      transform-origin: 160px center;
+      z-index: 2;
+    }
+  </style>
+</head>
+
+<body>
+  <input type="button" value="開始" id="btn-start">
+  <br>
+  <p>分數: <span id="score">0</span>分</p>
+  <p>剩餘: <span id="time">0</span>秒</p>
+  <hr>
+  <div id="game">
+    <div class="gun"></div>
+    <!-- <img src="./images/光束.gif" alt=""> -->
+  </div>
+  <script src="./jquery-3.6.0.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    // 分數
+    let score = 0
+    // 倒數時間
+    let countdown = 30
+    // 計時器
+    let timer = 0
+
+
+
+    const move = (zombie) => {
+      // 隨機移動
+      const top = `${Math.round(Math.random() * 70)}%`
+      const left = `${Math.round(Math.random() * 70)}%`
+      const size = `${Math.round(Math.random() * 70)}%`
+      zombie.stop().animate({
+        top: top,
+        // 如果 json 物件的值是變數，且跟 key 一樣時可以這樣寫
+        // left: left ---> left
+        left,
+        size
+      }, 2000, function () {
+        // 移動完之後遞迴再動一次
+        move(zombie)
+      })
+    }
+
+
+    $('#game').on('mousemove', function (e) {
+      const game = document.getElementById('game')
+      // 讓滑鼠懸浮殭屍時，槍的方向不跑掉
+      if (e.target !== game) return
+      // console.log(`X軸${e.offsetX},Y軸${e.offsetY}`)
+      let X = e.offsetX - game.offsetWidth / 2
+      let Y = game.offsetHeight / 2 - e.offsetY
+      let sinOfAngleX = X / Y
+      // console.log(game.offsetX)
+      // console.log(sinOfAngleX)
+      let degree = Math.atan(sinOfAngleX) * 180 / Math.PI
+      // console.log(degree)
+      if (X <= 0 && Y >= 0) {
+        $('.gun').css('transform', `rotate(${72 + degree}deg)`)
+        $('.gun').css('background-image', `url("./images/光束槍.png")`)
+      } else if(X >= 0 && Y >= 0) {
+        $('.gun').css('transform', `rotate(${72 + degree}deg)`)
+        $('.gun').css('background-image', `url("./images/光束槍(反).png")`)
+      } else if(X <= 0 && Y <= 0) {
+        $('.gun').css('transform', `rotate(${72 + 180 + degree}deg)`)
+        $('.gun').css('background-image', `url("./images/光束槍.png")`)
+      } else if(X >= 0 && Y <= 0) {
+        $('.gun').css('transform', `rotate(${72 + 180 + degree}deg)`)
+        $('.gun').css('background-image', `url("./images/光束槍(反).png")`)
+      }
+      $('.gun').css({
+        // 無法點兩下選取
+        // 'user-select': 'none',
+        // 無法按住拖曳
+        // '-webkit-user-drag': 'none',
+        // 忽略點擊事件
+        'pointer-events': 'none'
+      })
+      let zombie = document.querySelector('.zombie')
+      if (e.target == zombie) return 
+      
+    })
+
+
+    $('#btn-start').click(function () {
+      // 停用開始按鈕
+      $(this).attr('disabled', true)
+      // 重設
+      score = 0
+      $('#score').text(score)
+      countdown = 5000
+      $('#time').text(countdown)
+
+      // 開始遊戲
+      timer = setInterval(function () {
+        // 倒數
+        countdown--
+        $('#time').text(countdown)
+
+        // 隨機產生殭屍
+        let random = Math.round(Math.random() * 10)
+        if (random > 1 && $("#game .zombie").length < 15) {
+          // 隨機位置出現
+          const top = `${Math.round(Math.random() * 70)}%`
+          const left = `${Math.round(Math.random() * 70)}%`
+          const size = `${Math.round(Math.random() * 30)+40}%`
+          const zombie = $(`<img class="zombie" src="./images/Piglin_being_zombified.gif" style="top:${top}; left:${left}; transform:scale(${size})">`)
+          $('#game').append(zombie)
+          move(zombie)
+          $('.zombie').css({
+        // 無法點兩下選取
+        'user-select': 'none',
+        // 無法按住拖曳
+        '-webkit-user-drag': 'none',
+        // 忽略點擊事件
+        // 'pointer-events': 'none'
+      })
+        }
+        // 時間到
+        if (countdown <= 0) {
+          clearInterval(timer)
+          // 清除遊戲區域
+          $('#game img').remove()
+          // 重新起用開始按鈕
+          $('#btn-start').attr('disabled', false)
+          Swal.fire({
+            icon: 'info',
+            title: '時間到',
+            text: `你得到 ${score} 分`
+          })
+        }
+      }, 1000)
+    })
+
+    $('#game').on('click', 'img', function (e) {
+      $(this).attr('src', './blood.png')
+      $(this).stop()
+      $(this).css({
+        // 無法點兩下選取
+        'user-select': 'none',
+        // 無法按住拖曳
+        '-webkit-user-drag': 'none',
+        // 忽略點擊事件
+        'pointer-events': 'none'
+      })
+      $(this).removeClass('zombie').addClass('blood')
+      score++
+      $('#score').text(score)
+    })
+
+    $('#game').on('mousemove', function (e) {
+      // 讓滑鼠懸浮殭屍時，跳出事件，light就角度不會跑掉
+      if (e.target !== game) return
+      // console.log(`X軸${e.offsetX},Y軸${e.offsetY}`)
+      let X = e.offsetX - game.offsetWidth / 2
+      let Y = game.offsetHeight / 2 - e.offsetY
+      let sinOfAngleX = X / Y
+      
+      console.log(e.clientX)
+      let degree = Math.atan(sinOfAngleX) * 180 / Math.PI
+      // console.log(degree)
+      let light = $(`<img class="light" src="./images/光束.gif" style="transform:rotate(deg)">`)
+      $('#game').append(light)
+      if (X <= 0 && Y >= 0) {
+        $('.light').css('transform', `rotate(${270 + 3 + degree}deg)`)
+        // $('.light').attr('src','./images/光束2.gif')
+      } else if(X >= 0 && Y >= 0) {
+        $('.light').css('transform', `rotate(${270 + 3 + degree}deg)`)
+      } else if(X <= 0 && Y <= 0) {
+        $('.light').css('transform', `rotate(${270 + 3 + 180 + degree}deg)`)
+      } else if(X >= 0 && Y <= 0) {
+        $('.light').css('transform', `rotate(${270 + 3 + 180 + degree}deg)`)
+      }
+      // $('.light').eq(0).fadeOut(1000)
+      // let zombie = document.getElementsByClassName('zombie')
+      // if (e.target === zombie) {
+      // let X = e.offsetX - game.offsetWidth / 2
+      // let Y = game.offsetHeight / 2 - e.offsetY
+      // let sinOfAngleX = X / Y
+      // // console.log(X, Y)
+      // // console.log(sinOfAngleX)
+      // let degree = Math.atan(sinOfAngleX) * 180 / Math.PI
+      // // console.log(degree)
+      // let light = $(`<img class="light" src="./images/光束.gif" style="transform:rotate(deg)">`)
+      // $('#game').append(light)
+      // if (X <= 0 && Y >= 0) {
+      //   $('.light').css('transform', `rotate(${270 + 6 + degree}deg)`)
+      // } else if(X >= 0 && Y >= 0) {
+      //   $('.light').css('transform', `rotate(${270 + 6 + degree}deg)`)
+      // } else if(X <= 0 && Y <= 0) {
+      //   $('.light').css('transform', `rotate(${270 + 6 + 180 + degree}deg)`)
+      // } else if(X >= 0 && Y <= 0) {
+      //   $('.light').css('transform', `rotate(${270 + 6 + 180 + degree}deg)`)
+      // }
+      // }
+      
+
+      // console.log($('#game').append(light))
+      $('.light').css({
+        // 無法點兩下選取
+        'user-select': 'none',
+        // 無法按住拖曳
+        '-webkit-user-drag': 'none',
+        // 忽略點擊事件
+        'pointer-events': 'none'
+      })
+
+      let timer = setInterval(() => {
+        $('.light').eq(1).remove()
+      }, 100);
+
+      
+    })
+    
+    // $('.zombie').on('click', function (e) {
+    //   if (e.target !== game) return
+    //   // console.log(`X軸${e.offsetX},Y軸${e.offsetY}`)
+    //   let X = e.offsetX - game.offsetWidth / 2
+    //   let Y = game.offsetHeight / 2 - e.offsetY
+    //   let sinOfAngleX = X / Y
+    //   console.log(X, Y)
+    //   // console.log(sinOfAngleX)
+    //   let degree = Math.atan(sinOfAngleX) * 180 / Math.PI
+    //   // console.log(degree)
+    //   const light = $(`<img class="light" src="./images/光束.gif" style="transform:rotate(deg)">`)
+    //   $('#game').append(light)
+    //   if (X <= 0 && Y >= 0) {
+    //     $('.light').css('transform', `rotate(${270 + degree}deg)`)
+    //   } else if(X >= 0 && Y >= 0) {
+    //     $('.light').css('transform', `rotate(${270 + degree}deg)`)
+    //   } else if(X <= 0 && Y <= 0) {
+    //     $('.light').css('transform', `rotate(${270 + 180 + degree}deg)`)
+    //   } else if(X >= 0 && Y <= 0) {
+    //     $('.light').css('transform', `rotate(${270 + 180 + degree}deg)`)
+    //   }
+      
+
+    //   console.log($('#game').append(light))
+    //   $('.light').css({
+    //     // 無法點兩下選取
+    //     // 'user-select': 'none',
+    //     // 無法按住拖曳
+    //     '-webkit-user-drag': 'none',
+    //     // 忽略點擊事件
+    //     'pointer-events': 'none'
+    //   })
+
+    //   let timer = setInterval(() => {
+    //     $('.light').eq(100).remove()
+    //   }, 2000);
+
+
+    // })
+
+    // const game = document.getElementById('game')
+    // game.onclick = (e) => {}
+
+  </script>
+</body>
+
+</html>
