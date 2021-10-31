@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100;300;400;500;700;900&family=Roboto+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Zen+Kurenaido&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100;300;400;500;700;900&family=Roboto+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Russo+One&family=Zen+Kurenaido&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./animate.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      color: #fff;
+      font-family: 'Russo One', sans-serif;
+    }
+
+    .btn-turnOn {
+      width: 300px;
+      height: 100px;
+      /* color: black; */
+      padding: 20px auto;
+      font-size: 2.8rem;
+      font-weight:bolder;
+      background: rgba(83, 179, 179, 0.973);
+      letter-spacing: 8px;
+      border-radius: 35px 15px 35px 15px;
+      font-style: oblique;
+      border-width: 8px 10px 10px 8px;
+      border-color: rgba(255, 255, 255, 0.808);
+      border-style: solid;
+      text-shadow: 5px 5px 5px rgba(55, 119, 119, 0.973);
+      box-shadow: 5px 5px 4px 0px rgba(79, 165, 172, 0.5);
+      transition: .2s;
+      cursor: pointer;
+    }
+
+    .btn-turnOff {
+      width: 300px;
+      height: 100px;
+      padding: 20px auto;
+      font-size: 2.8rem;
+      font-weight:bolder;
+      background: rgba(52, 107, 107, 0.37);
+      letter-spacing: 8px;
+      border-radius: 35px 15px 35px 15px;
+      font-style: oblique;
+      border-width: 8px 10px 10px 8px;
+      border-color: rgba(177, 165, 165, 0.062);
+      border-style: solid;
+      text-shadow: 5px 5px 5px rgba(55, 119, 119, 0.973);
+      box-shadow: 5px 5px 4px 0px rgba(79, 165, 172, 0.5);
+      color:rgba(83, 179, 179, 0.26);
+    }
+
+    .btn-turnOn:hover {
+      width: 305px;
+      height: 102px;
+      font-size: 3rem;
+      background: rgba(96, 201, 136, 0.966);
+      filter: drop-shadow(2px 2px 2px rgba(255,255,255,0.5));
+      box-shadow: 2px 2px 2px 2px rgba(79, 165, 172, 0.5);
+      color: rgba(55, 119, 119, 0.973);
+      text-shadow: 5px 5px 2px rgba(202, 224, 224, 0.973);
+      border-color: rgba(55, 119, 119, 0.973);
+    }
+
+
+    /* 解決 Swal 跑出來時，點選檢查、縮小視窗會底部空白的問題 */
+    html,
+    body {
+      height:100vh;
+    }
+
+    body {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column-reverse;
+      background: url(./images/char2.gif) no-repeat center/cover;
+      /* backdrop-filter: blur(5px); */
+      background-color: #000;
+    }
+
+    #game {
+      width: 1200px;
+      height: 675px;
+      background: url(./images/char.gif) no-repeat center/contain;
+      /* filter: brightness(50%); */
+      overflow: hidden;
+      position: relative;
+      /* border: 1px solid #333; */
+      cursor: url(./images/準星2.png) 50 50,auto;
+    }
+
+    #game img {
+      height: 150px;
+      position: absolute;
+      cursor: url(./images/準星3.png) 50 50,pointer;
+    }
+
+    .gun {
+      width: 100px;
+      height: 80px;
+      background-image: url("./images/Z.gif");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+      position: absolute;
+      top: calc(50% - 40px);
+      left: calc(50% - 50px);
+      transform: rotate(0deg);
+      z-index: 2;
+    }
+
+
+    .zombie {
+      z-index: 4;
+    }
+
+    .blood {
+      z-index: 4;
+    }
+
+    .light {
+      width: 950px;
+      height: auto !important;
+      position: absolute;
+      top: calc(50% - 265px);
+      left: calc(50% - 200px);
+      /* border: 1px solid #111; */
+      transform-origin: 200px center;
+      z-index: 3;
+    }
+
+    section {
+      margin-top: 20px;
+      width: 1200px;
+      height: 100px;
+      /* border: 1px solid #fff; */
+      display: flex;
+      justify-content: space-around;
+    }
+
+    #score {
+      line-height:100px;
+      font-size: 3rem;
+    }
+
+    #time {
+      line-height:100px;
+      font-size: 3rem;
+    }
+
+    p{
+      font-size:1.5rem;
+      letter-spacing: 3px;
+    }
+  </style>
+</head>
+
+<body>
+  <section>
+  <input type="button" value="START" id="btn-start" class="btn-turnOn">
+
+  <p class="animate">SCORE&nbsp;:&nbsp;<span id="score">0</span>&nbsp;points</p>
+  <p>TIME&nbsp;:&nbsp;<span id="time">60</span>&nbsp;seconds</p>
+
+  </section>
+  <audio id="audio"></audio>
+  <div id="game">
+    <div class="gun"></div>
+  </div>
+  <script src="./jquery-3.6.0.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    
+    // 分數
+    let score = 0
+    // 倒數時間
+    let countdown = 60
+    // 計時器
+    let timer = 0
+    // 光束流水號
+    let lightid = 0
+    // 射擊音效
+    const audioPlay = new Audio()
+
+    const move = (zombie) => {
+      // 隨機移動
+      const top = `${Math.round(Math.random() * 70)}%`
+      const left = `${Math.round(Math.random() * 70)}%`
+      const size = `${Math.round(Math.random() * 70)}%`
+      zombie.stop().animate({
+        top: top,
+        // 如果 json 物件的值是變數，且跟 key 一樣時可以這樣寫
+        // left: left ---> left
+        left,
+        size
+      }, 2000, function () {
+        // 移動完之後遞迴再動一次
+        move(zombie)
+      })
+    }
+
+
+    $('#game').on('mousemove', function (e) {
+      const game = document.getElementById('game')
+      // 讓滑鼠懸浮殭屍時，槍的方向不跑掉
+      // if (e.target !== game) return
+
+      // 讓選到殭屍時，offsetX/Y 的偏移量校正回來
+      if (e.target !== game) {
+      e.offsetX = e.target.offsetLeft + e.offsetX
+      e.offsetY = e.target.offsetTop + e.offsetY
+      // console.log(e.offsetX)
+      }
+
+      // console.log(`X軸${e.offsetX},Y軸${e.offsetY}`)
+      let X = e.offsetX - game.offsetWidth / 2
+      let Y = game.offsetHeight / 2 - e.offsetY
+      let sinOfAngleX = X / Y
+      // console.log(game.offsetX)
+      // console.log(sinOfAngleX)
+      let degree = Math.atan(sinOfAngleX) * 180 / Math.PI
+      // console.log(degree)
+      if (X <= 0 && Y >= 0) {
+        $('.gun').css('transform', `rotate(${72 + degree}deg)`)
+        $('.gun').css('background-image', `url("./images/Z.gif")`)
+      } else if(X >= 0 && Y >= 0) {
+        $('.gun').css('transform', `rotate(${72 + degree}deg)`)
+        $('.gun').css('background-image', `url("./images/Z(反).gif")`)
+      } else if(X <= 0 && Y <= 0) {
+        $('.gun').css('transform', `rotate(${72 + 180 + degree}deg)`)
+        $('.gun').css('background-image', `url("./images/Z.gif")`)
+      } else if(X >= 0 && Y <= 0) {
+        $('.gun').css('transform', `rotate(${72 + 180 + degree}deg)`)
+        $('.gun').css('background-image', `url("./images/Z(反).gif")`)
+      }
+      $('.gun').css({
+        // 無法點兩下選取
+        // 'user-select': 'none',
+        // 無法按住拖曳
+        // '-webkit-user-drag': 'none',
+        // 忽略點擊事件
+        'pointer-events': 'none'
+      })
+    })
+
+
+    $('#btn-start').click(function () {
+
+      // 停用開始按鈕
+      $(this).attr('disabled', true)
+      $(this).removeClass('btn-turnOn').addClass('btn-turnOff')
+      // 重設
+      score = 0
+      $('#score').text(score)
+      countdown = 60
+      $('#time').text(countdown)
+
+      // 開始遊戲
+      timer = setInterval(function () {
+        // 倒數
+        countdown--
+        $('#time').text(countdown)
+
+        // 隨機產生殭屍
+        let random = Math.round(Math.random() * 10)
+        if (random > 5 && $("#game .zombie").length < 15) {
+          // 隨機位置出現
+          const top = `${Math.round(Math.random() * 70)}%`
+          const left = `${Math.round(Math.random() * 70)}%`
+          const size = `${Math.round(Math.random() * 30)+40}%`
+          const zombie = $(`<img class="zombie" src="./images/freedom.gif" style="top:${top}; left:${left}; transform:scale(${size})">`)
+          const zombie1 = $(`<img class="zombie" src="./images/freedom(反).gif" style="top:${left}; left:${top}; transform:scale(${size})">`)
+          const zombie2 = $(`<img class="zombie" src="./images/次代.gif" style="top:${top}; left:${left}; transform:scale(${size})">`)
+          const zombie3 = $(`<img class="zombie" src="./images/次代(反).gif" style="top:${left}; left:${top}; transform:scale(${size})">`)
+          $('#game').append(zombie)
+          $('#game').append(zombie1)
+          $('#game').append(zombie2)
+          $('#game').append(zombie3)
+          move(zombie)
+          move(zombie1)
+          move(zombie2)
+          move(zombie3)
+          $('.zombie').css({
+        // 無法點兩下選取
+        'user-select': 'none',
+        // 無法按住拖曳
+        '-webkit-user-drag': 'none',
+        // 忽略點擊事件
+        // 'pointer-events': 'none'
+      })
+        }
+        if (countdown <= 10) {
+          $('#time').css('color','red')
+        }
+        // 時間到
+        if (countdown <= 0) {
+          clearInterval(timer)
+          // 清除遊戲區域
+          $('#game img').remove()
+          // 重新起用開始按鈕
+          $('#btn-start').attr('disabled', false)
+          $('#btn-start').removeClass('btn-turnOff').addClass('btn-turnOn')
+          Swal.fire({
+            icon: 'info',
+            title: '時間到囉！',
+            text: `你得到 ${score} 分`
+          })
+          $('#time').css('color','white')
+        }
+      }, 1000)
+    })
+
+    $('#game').on('click', 'img', function (e) {
+      
+      $(this).attr('src', './images/爆炸.gif')
+      $(this).stop()
+      $(this).css({
+        // 無法點兩下選取
+        'user-select': 'none',
+        // 無法按住拖曳
+        '-webkit-user-drag': 'none',
+        // 忽略點擊事件
+        'pointer-events': 'none'
+      })
+      $(this).removeClass('zombie').addClass('blood')
+      $('.blood').fadeOut(2000,function(){
+        $(this).remove()
+      })
+      score++
+      $('#score').text(score)
+      // 讓分數隨著增加而跳動，注意 animate.css 動畫不能用在 span 標籤，這裡需要選到 p 標籤的 class
+      if (score != score + 1) {
+        // $('.animate').find("animate__animated").removeClass("animate__animated")
+        // $('.animate').find("animate__bounce").removeClass("animate__bounce")
+        $('.animate').addClass("animate__animated animate__bounce")
+        setTimeout (function() {
+          $('.animate').removeClass("animate__animated animate__bounce")
+        },500)
+      }
+    })
+
+    $('#game').on('click', function (e) {
+      audioPlay.src = "./光束步槍.mp3"
+      audioPlay.play()
+      audioPlay.volume = 0.5
+      // 讓滑鼠懸浮殭屍時，跳出事件，light就角度不會跑掉
+      // if (e.target !== game) return
+
+      // 讓選到殭屍時，offsetX/Y 的偏移量校正回來
+      if (e.target !== game) {
+        e.offsetX = e.target.offsetLeft + e.offsetX
+        e.offsetY = e.target.offsetTop + e.offsetY
+        // console.log(e.offsetX)
+      }
+
+      let X = e.offsetX - game.offsetWidth / 2
+      let Y = game.offsetHeight / 2 - e.offsetY
+      let sinOfAngleX = X / Y
+      // console.log(e.offsetX)
+
+      let degree = Math.atan(sinOfAngleX) * 180 / Math.PI
+      let light = $(`<img class="light" id="light${lightid}" src="./images/光束.gif" style="transform:rotate(0deg)">`)
+      $('#game').append(light)
+      if (X <= 0 && Y >= 0) {
+        $(`#light${lightid}`).css('transform', `rotate(${270 + 3 + degree}deg)`)
+        $(`#light${lightid}`).fadeOut(2000 ,function(){
+          $(this).remove()
+        })
+      } else if(X >= 0 && Y >= 0) {
+        $(`#light${lightid}`).css('transform', `rotate(${270 + 3 + degree}deg)`)
+        $(`#light${lightid}`).fadeOut(2000 ,function(){
+          $(this).remove()
+        })
+      } else if(X <= 0 && Y <= 0) {
+        $(`#light${lightid}`).css('transform', `rotate(${270 + 3 + 180 + degree}deg)`)
+        $(`#light${lightid}`).fadeOut(2000 ,function(){
+          $(this).remove()
+        })
+      } else if(X >= 0 && Y <= 0) {
+        $(`#light${lightid}`).css('transform', `rotate(${270 + 3 + 180 + degree}deg)`)
+        $(`#light${lightid}`).fadeOut(2000 ,function(){
+          $(this).remove()
+        })
+      }
+      // 這邊 light++ 如果放在if 判斷式上面，每個新增的 light 角度不會變更
+      lightid++
+
+      // 讓光束不會被選取而變成 blood.jpg
+      $('.light').css({
+        // 無法點兩下選取
+        'user-select': 'none',
+        // 無法按住拖曳
+        '-webkit-user-drag': 'none',
+        // 忽略點擊事件
+        'pointer-events': 'none'
+      })
+
+      // 光束超過25條則 remove
+      let timer = setInterval(() => {
+        $('.light').eq(25).remove()
+      }, 100);
+    })
+    
+  </script>
+</body>
+
+</html>
